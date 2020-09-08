@@ -10,7 +10,21 @@ function ResourceShadow(options) {
   this.online = options.online === true ||
     ((!!options.url) && options.online !== false);
   this.saveMethod = /^post$/i.test(options.saveMethod) ? 'post' : 'put';
-  this.localStorage = options.localStorage || localStorage;
+  try{
+    this.localStorage = options.localStorage || localStorage;
+  }catch(e){
+    this.localStorage = {
+         _data       : {},
+         setItem     : function(id, val) {
+           return this._data[id] = String(val);
+         },
+         getItem     : function(id) {
+           return this._data.hasOwnProperty(id) ? this._data[id] : {};
+         },
+         removeItem  : function(id) { return delete this._data[id]; },
+         clear       : function() { return this._data = {}; }
+    };
+  }
   this.localStorageObserver = options.localStorageObserver ||
     (defaultLocalStorageObserver = defaultLocalStorageObserver || require('./local-storage-observer'));
   this.httpHandler = options.httpHandler ||
